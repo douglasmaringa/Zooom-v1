@@ -141,11 +141,26 @@ const MessageInput = ({id }) => {
           if(firebaseUrl){
             var user = firebase.auth().currentUser;
 
-           db.collection('chatroom').doc(id).update({
-            messages: firebase.firestore.FieldValue.arrayUnion({"message":message,"sender":user.email, "image":firebaseUrl,"audio":'',"time":Date.now()}),
-            lastmessage:message,
-            new:0
-            })
+            db.collection('messages').add({
+              timestamp:firebase.firestore.FieldValue.serverTimestamp(),
+              "chatroomID":id,
+              "message":message,
+              "sender":user.email, 
+              "image":firebaseUrl,
+              "audio":'',
+              "time":Date.now(),
+              lastmessage:message,
+              new:1,
+              "status":"",
+            }).then((res)=>{
+              console.log("message sent here is ID:",res.id)
+              db.collection('messages').doc(res.id).update({
+                "status":"DELIVERED",
+                })
+              }).catch((error)=>{
+                console.log(error)
+              })
+  
             setLoading(false)
             resetFields();
           }
@@ -224,11 +239,25 @@ const MessageInput = ({id }) => {
           if(firebaseUrl){
             var user = firebase.auth().currentUser;
 
-           db.collection('chatroom').doc(id).update({
-            messages: firebase.firestore.FieldValue.arrayUnion({"message":message,"sender":user.email, "image":'',"audio":firebaseUrl,"time":Date.now()}),
-            lastmessage:message,
-            new:0
-            })
+            db.collection('messages').add({
+              timestamp:firebase.firestore.FieldValue.serverTimestamp(),
+              "chatroomID":id,
+              "message":message,
+              "sender":user.email, 
+              "image":'',
+              "audio":firebaseUrl,
+              "time":Date.now(),
+              lastmessage:message,
+              new:1,
+              "status":"",
+            }).then((res)=>{
+              console.log("message sent here is ID:",res.id)
+              db.collection('messages').doc(res.id).update({
+                "status":"DELIVERED",
+                })
+              }).catch((error)=>{
+                console.log(error)
+              })
             setLoading(false)
             resetFields();
           }
@@ -243,12 +272,26 @@ const MessageInput = ({id }) => {
 const sendMessage = ()=>{
   var user = firebase.auth().currentUser;
 
-  db.collection('chatroom').doc(id).update({
-    messages: firebase.firestore.FieldValue.arrayUnion({"message":message,"sender":user.email, "image":'',"audio":'',"time":Date.now()}),
+  db.collection('messages').add({
+    timestamp:firebase.firestore.FieldValue.serverTimestamp(),
+    "chatroomID":id,
+    "message":message,
+    "sender":user.email, 
+    "image":'',
+    "audio":'',
+    "time":Date.now(),
     lastmessage:message,
-    new:0
+    new:0,
+    "status":"",
   }).then((res)=>{
-    console.log(res)
+    console.log("message sent here is ID:",res.id)
+    db.collection('messages').doc(res.id).update({
+      "status":"DELIVERED",
+      })
+      db.collection('chatroom').doc(id).update({
+        lastmessage:message,
+         new:user.email,
+        })
     }).catch((error)=>{
       console.log(error)
     })

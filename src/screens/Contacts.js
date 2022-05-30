@@ -108,7 +108,6 @@ const Contacts = ({ navigation }) => {
                   db.collection('chatroom').add({
                     //timestamp:firebase.firestore.FieldValue.serverTimestamp(),
                     members:[data.email,user.email],
-                    messages:[{"message":"","sender":user.email, "image":'',"audio":'',"time":Date.now()}],
                     lastmessage:"",
                     newMessages:0,
                 }).then(res=>{

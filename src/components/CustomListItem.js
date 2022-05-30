@@ -3,6 +3,7 @@ import { ListItem, Avatar } from 'react-native-elements'
 import { db } from '../services/firebase'
 import { styles } from '../styles/CustomListItemStyles'
 import firebase from 'firebase'
+import { Text } from 'react-native-elements'
 
 const CustomListItem = ({ id, data, enterChat }) => {
 
@@ -45,9 +46,13 @@ const CustomListItem = ({ id, data, enterChat }) => {
                     style={styles.listItemSubtitle}
                 >
                     {data.lastmessage?<>{data.lastmessage}</>:<></>}
+                   
                 </ListItem.Subtitle>
             </ListItem.Content>
-        </ListItem>
+            
+            <Text style={{color:'white',padding:10}}> {data.new == other ?<>New</>:<></>}</Text>
+         
+              </ListItem>
     )
 }
 

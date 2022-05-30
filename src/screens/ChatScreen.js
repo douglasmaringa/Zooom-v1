@@ -71,7 +71,7 @@ const ChatScreen = ({ navigation, route }) => {
         
             db.collection("chatroom").doc(route.params.id)
             .onSnapshot((querySnapshot) => {
-                setMessages(querySnapshot.data().messages)
+                
                 console.log(querySnapshot.data().members)
 
                 if(querySnapshot.data()){
@@ -84,6 +84,12 @@ const ChatScreen = ({ navigation, route }) => {
                   setMe(querySnapshot.data().members[1])
                   }
                 }
+               
+            })    
+
+            db.collection("messages").where("chatroomID","==",route.params.id).orderBy('timestamp', 'asc')
+            .onSnapshot((querySnapshot) => {
+                    setMessages(querySnapshot.docs.map(doc=>({ ...doc.data(), id: doc.id })));
                
             })    
         
