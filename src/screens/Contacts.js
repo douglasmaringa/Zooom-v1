@@ -113,6 +113,7 @@ const Contacts = ({ navigation }) => {
                     members:[data.email,user.email],
                     lastmessage:"",
                     newMessages:0,
+                    show:false
                 }).then(res=>{
                   
                 console.log(`${data.email} has been added to your chats`)

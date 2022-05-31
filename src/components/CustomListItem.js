@@ -10,6 +10,7 @@ const CustomListItem = ({ id, data, enterChat }) => {
 
     const [chatMessages, setChatMessages] = useState([])
     const[other,setOther]=useState("")
+    const[user,setUser] = useState("")
     console.log(data)
 
     useEffect(() => {
@@ -22,7 +23,17 @@ const CustomListItem = ({ id, data, enterChat }) => {
         }
     }, [])
 
-   //console.log(moment(new Date(data.lastmessagetime.seconds*1000)).fromNow())
+    useEffect(() => {
+        db.collection("users").where("email","==",other)
+        .onSnapshot((querySnapshot) => {
+                if(!querySnapshot.docs.map(doc=>({ ...doc.data(), id: doc.id }))){
+                    alert("cannot get users image in Homescreen")
+                    return;
+                }
+                setUser(querySnapshot.docs.map(doc=>({ ...doc.data(), id: doc.id }))[0]?.image);
+           
+        })    
+    }, [other])
 
     return (
         <ListItem
@@ -33,7 +44,7 @@ const CustomListItem = ({ id, data, enterChat }) => {
             <Avatar
                 size={50}
                 rounded
-                source={{ uri: chatMessages?.[0]?.photoURL || 'https://secure.gravatar.com/avatar/d3afc60628a78f856952f6d76a2f37b8?s=150&r=g&d=https://delivery.farmina.com.br/wp-content/plugins/userswp/assets/images/no_profile.png' }}
+                source={{ uri: user || 'https://secure.gravatar.com/avatar/d3afc60628a78f856952f6d76a2f37b8?s=150&r=g&d=https://delivery.farmina.com.br/wp-content/plugins/userswp/assets/images/no_profile.png' }}
             />
 
             <ListItem.Content>
@@ -46,9 +57,19 @@ const CustomListItem = ({ id, data, enterChat }) => {
                     ellipsizeMode="tail"
                     style={styles.listItemSubtitle}
                 >
-                    {data.lastmessage?<>{data.lastmessage}  <Text style={{color:'gray'}}> {data?.lastmessagetime ?<>({moment(new Date(data.lastmessagetime.seconds*1000)).fromNow()})</>:<></>}</Text>
+                    {
+                        data.new == other?(<>
+                        <Text style={{color:'white'}}>{data.lastmessage?<>{data.lastmessage}  <Text style={{color:'white'}}> {data?.lastmessagetime ?<>({moment(new Date(data.lastmessagetime.seconds*1000)).fromNow()})</>:<></>}</Text>
+            </>:<></>}</Text> 
+                    
+                        </>):
+                        (<>
+                         {data.lastmessage?<>{data.lastmessage}  <Text style={{color:'gray'}}> {data?.lastmessagetime ?<>({moment(new Date(data.lastmessagetime.seconds*1000)).fromNow()})</>:<></>}</Text>
             </>:<></>}
                     
+                        </>)
+                    }
+                   
                 </ListItem.Subtitle>
                
             </ListItem.Content>

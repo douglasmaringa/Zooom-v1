@@ -15,12 +15,12 @@ import moment from 'moment';
 const blue = "#3777f0";
 const grey = "lightgrey";
 
-const Message = ({me,other, message,route }) => {
+const Message = ({me,other, message,route,show }) => {
   const [user, setUser] = useState();
   const [isMe, setIsMe] = useState(false);
   const [soundURI, setSoundURI] = useState(null);
   const [decryptedContent, setDecryptedContent] = useState("");
-  const[show,setShow]=useState(false)
+ 
 
   const { width } = useWindowDimensions();
   
@@ -82,6 +82,8 @@ const Message = ({me,other, message,route }) => {
     console.log("decrypted", decrypted);
     setDecryptedContent(decrypted.message);
   };
+
+  console.log("show",show)
 
   return (
     <View

@@ -22,7 +22,7 @@ const HomeScreen = ({ navigation,route }) => {
     useEffect(() => {
         var user = firebase.auth().currentUser;
 
-        const unsubscribe = db.collection("chatroom").where("members", "array-contains", user.email)
+        const unsubscribe = db.collection("chatroom").where("members", "array-contains", user.email).orderBy('lastmessagetime', 'desc')
         .onSnapshot((querySnapshot) => {
            
             setChats(querySnapshot.docs.map(doc => ({

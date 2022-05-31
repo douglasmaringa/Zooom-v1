@@ -13,18 +13,19 @@ import { Header } from '@react-navigation/stack';
 
 const ChatScreen = ({ navigation, route }) => {
 
-    console.log(route.params.id)
+    console.log(route.params)
 
     const [input, setInput] = useState('')
     const [messages, setMessages] = useState([])
     const [me, setMe] = useState("")
     const [other, setOther] = useState("")
+    const[show,setShow]=useState(false)
 
     useLayoutEffect(() => {
         navigation.setOptions({
             headerTitleAlign: 'center',
             headerTitle: () => (
-                <Text style={styles.headerTitle}>
+                <Text style={styles.headerTitle} onPress={chatinfo}>
                     {route.params.name}
                 </Text>
             ),
@@ -67,6 +68,7 @@ const ChatScreen = ({ navigation, route }) => {
         setInput('')
     }
 
+
     useEffect(() => {
         
             db.collection("chatroom").doc(route.params.id)
@@ -79,6 +81,7 @@ const ChatScreen = ({ navigation, route }) => {
                  }
                 if(querySnapshot.data()){
                 var user = firebase.auth().currentUser;
+                setShow(querySnapshot.data().show)
                 if(querySnapshot.data().members[0] === user.email){
                    setOther(querySnapshot.data().members[1])
                    setMe(querySnapshot.data().members[0])
@@ -101,6 +104,13 @@ const ChatScreen = ({ navigation, route }) => {
     console.log("me",me)
     console.log("other",other)
 
+    const chatinfo = ()=>{
+        navigation.navigate('ChatInfo', {
+            ChatroomID: route.params.id,
+            name:other
+        })
+    }
+
     return (
         <>
             <StatusBar style="light" />
@@ -115,7 +125,7 @@ const ChatScreen = ({ navigation, route }) => {
                     <>
                     <FlatList
                        
-                       renderItem={({ item }) => <Message me={me} other={other}  message={item}/> }
+                       renderItem={({ item }) => <Message show={show} me={me} other={other}  message={item}/> }
                        inverted
                        data={[...messages].reverse()}
                          />
