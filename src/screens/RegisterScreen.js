@@ -4,6 +4,11 @@ import { StatusBar } from 'expo-status-bar'
 import { auth,db } from '../services/firebase'
 import { styles } from '../styles/RegisterScreenStyles'
 import firebase from 'firebase'
+import { generateKeyPair } from "../utils/crypto";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+
+export const PRIVATE_KEY = "PRIVATE_KEY";
 
 const RegisterScreen = ({ navigation }) => {
 
@@ -13,7 +18,7 @@ const RegisterScreen = ({ navigation }) => {
     const [imageURL, setImageURL] = useState('')
     const [loading, setLoading] = useState(false)
 
-    const register =  () =>  {
+    const register = () =>  {
         setLoading(false)
 
         auth
@@ -32,10 +37,29 @@ const RegisterScreen = ({ navigation }) => {
                     chatroom:[],
                     friends:[],
                    
-                  }).then(()=>{
-                      console.log("done")
+                  }).then((res)=>{
+                      console.log("done",res.id)
+
+                      //generate key pair 
+                      // generate private/public key
+                    const { publicKey, secretKey } = generateKeyPair();
+                    console.log(publicKey, secretKey);
+
+                    // save private key to Async storage
+                    AsyncStorage.setItem(PRIVATE_KEY, secretKey.toString()).then(()=>{
+                    console.log("secret key was saved");
+
+                    // save public key to UserModel in Datastore
+                     db.collection('users').doc(res?.id).update({
+                     publicKey:publicKey.toString(),
+                      })
+                    }).catch((error)=>{
+                        alert("failed to generate private key")
+                    })
+                      
+                    //Alert.alert("Successfully updated the keypair.");
                   }).catch(error => alert(error.message))
-            })
+                  })
             .catch(error => alert(error.message))
 
         Keyboard.dismiss()

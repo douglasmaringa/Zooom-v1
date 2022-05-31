@@ -4,6 +4,14 @@ import { useWindowDimensions } from "react-native";
 import AudioPlayer from "./AudioPlayer";
 import { Ionicons } from "@expo/vector-icons";
 import { db } from "../services/firebase";
+import { box } from "tweetnacl";
+import {
+  decrypt,
+  getMySecretKey,
+  stringToUint8Array,
+} from "../utils/crypto";
+import moment from 'moment';
+
 const blue = "#3777f0";
 const grey = "lightgrey";
 
@@ -11,7 +19,8 @@ const Message = ({me,other, message,route }) => {
   const [user, setUser] = useState();
   const [isMe, setIsMe] = useState(false);
   const [soundURI, setSoundURI] = useState(null);
- 
+  const [decryptedContent, setDecryptedContent] = useState("");
+  const[show,setShow]=useState(false)
 
   const { width } = useWindowDimensions();
   
@@ -41,6 +50,39 @@ const Message = ({me,other, message,route }) => {
       
   },[message,route,me])
 
+  useEffect(() => {
+
+    db.collection("users").where("email", "==", other)
+  .onSnapshot((querySnapshot) => {
+
+  const res = (querySnapshot.docs.map(doc => ({id: doc.data()})))
+  if (!message?.message || !res[0]?.id.publicKey) {
+    return;
+  }
+  //other user key res[0]?.id.publicKey)
+  decryptMessage(res);
+})
+
+   
+
+    
+
+   
+  }, [message,other]);
+
+  const decryptMessage = async (res) => {
+    const myKey = await getMySecretKey();
+    if (!myKey) {
+      return;
+    }
+    // decrypt message.content
+    const sharedKey = box.before(stringToUint8Array(res[0]?.id.publicKey), myKey);
+    console.log("sharedKey", sharedKey);
+    const decrypted = decrypt(sharedKey, message.message);
+    console.log("decrypted", decrypted);
+    setDecryptedContent(decrypted.message);
+  };
+
   return (
     <View
       style={[
@@ -51,23 +93,49 @@ const Message = ({me,other, message,route }) => {
     >
       {message.image? (
         <View style={{ marginBottom: message.content ? 10 : 0 }}>
-          <Image
+          {
+            show?(<>
+            <Image
+            source={{uri:'https://play-lh.googleusercontent.com/19GU_MtEUEYBvY-TUH6IF96d8AyGYYZoeob1eDQymFXaQb9qtZADzAIFKWoYPFtDci4=w480-h960-rw'}}
+            style={{ width: width * 0.7, aspectRatio: 4 / 3 }}
+            resizeMode="contain"
+          />
+        
+            </>):(<>
+              <Image
             source={{uri:`${message.image}`}}
             style={{ width: width * 0.7, aspectRatio: 4 / 3 }}
             resizeMode="contain"
           />
+        
+            </>)
+          }
+          
         </View>
       ):(<></>)}
       {message.audio ? (<><AudioPlayer soundURI={message?.audio} /></>):(<></>)}
-
-      {!!message && (
-        <Text style={{ color: isMe ? "black" : "white" }}>
+       {
+         show?
+         (<>
+         {!!message.message && (
+        <Text style={{ color: isMe ? "black" : "white",marginRight:'auto' }}>
           {message.message}
         </Text>
       )}
+         </>):
+         (<>
+         {!!decryptedContent && (
+        <Text style={{ color: isMe ? "black" : "white" ,marginRight:'auto'}}>
+          {decryptedContent} 
+        </Text>
+      )}
+         </>)
+       }
 
           {isMe && !!message.status && message.status !== "SENT" && (
-          <Ionicons
+            <View style={{display:'flex',flexDirection:'row'}}>
+            <Text style={{fontSize:12,color:'gray'}}>{moment(new Date(message.timestamp.seconds*1000)).format('LT')}</Text>
+            <Ionicons
             name={
               message.status === "DELIVERED" ? "checkmark" : "checkmark-done"
             }
@@ -75,6 +143,8 @@ const Message = ({me,other, message,route }) => {
             color="gray"
             style={{ marginHorizontal: 5 }}
           />
+            </View>
+          
         )}
     </View>
   );

@@ -28,6 +28,12 @@ import { v4 as uuidv4 } from "uuid";
 import { Audio, AVPlaybackStatus } from "expo-av";
 import AudioPlayer from "./AudioPlayer";
 import { Header } from '@react-navigation/stack';
+import { box } from "tweetnacl";
+import {
+  encrypt,
+  getMySecretKey,
+  stringToUint8Array,
+} from "../utils/crypto";
 
 
 
@@ -39,6 +45,8 @@ const MessageInput = ({id }) => {
   const [recording, setRecording] = useState(null);
   const [soundURI, setSoundURI] = useState(null);
   const[loading,setLoading]= useState(false)
+  const [me, setMe] = useState("")
+  const [other, setOther] = useState("")
 
   
 
@@ -86,6 +94,8 @@ const MessageInput = ({id }) => {
     setSoundURI(null);
     
   };
+
+  
 
   // Image picker
   const pickImage = async () => {
@@ -144,12 +154,11 @@ const MessageInput = ({id }) => {
             db.collection('messages').add({
               timestamp:firebase.firestore.FieldValue.serverTimestamp(),
               "chatroomID":id,
-              "message":message,
+              "message":"",
               "sender":user.email, 
               "image":firebaseUrl,
               "audio":'',
               "time":Date.now(),
-              lastmessage:message,
               new:1,
               "status":"",
             }).then((res)=>{
@@ -242,12 +251,11 @@ const MessageInput = ({id }) => {
             db.collection('messages').add({
               timestamp:firebase.firestore.FieldValue.serverTimestamp(),
               "chatroomID":id,
-              "message":message,
+              "message":"",
               "sender":user.email, 
               "image":'',
               "audio":firebaseUrl,
               "time":Date.now(),
-              lastmessage:message,
               new:1,
               "status":"",
             }).then((res)=>{
@@ -269,35 +277,113 @@ const MessageInput = ({id }) => {
   };
 
 
-const sendMessage = ()=>{
-  var user = firebase.auth().currentUser;
+//know which user is which so we can fetch there user objects to get the public key
+useEffect(() => {
+        
+  db.collection("chatroom").doc(id)
+  .onSnapshot((querySnapshot) => {
+      
+      console.log(querySnapshot.data().members)
+      if(!querySnapshot.data()){
+        alert("could not find user line 288")
+        return;
+      }
+      if(querySnapshot.data()){
+      var user = firebase.auth().currentUser;
+      if(querySnapshot.data().members[0] === user.email){
+         setOther(querySnapshot?.data().members[1])
+         setMe(querySnapshot?.data().members[0])
+       }else {
+        setOther(querySnapshot?.data().members[0])
+        setMe(querySnapshot?.data().members[1])
+        }
+      }
+     
+  })    
 
-  db.collection('messages').add({
-    timestamp:firebase.firestore.FieldValue.serverTimestamp(),
-    "chatroomID":id,
-    "message":message,
-    "sender":user.email, 
-    "image":'',
-    "audio":'',
-    "time":Date.now(),
-    lastmessage:message,
-    new:0,
-    "status":"",
-  }).then((res)=>{
-    console.log("message sent here is ID:",res.id)
-    db.collection('messages').doc(res.id).update({
-      "status":"DELIVERED",
-      })
-      db.collection('chatroom').doc(id).update({
-        lastmessage:message,
-         new:user.email,
-        })
-    }).catch((error)=>{
-      console.log(error)
-    })
+
+}, [id])
+
+
+            //encrypt message and send
+         const getPK = async (res) => {
+         var user = firebase.auth().currentUser;
+          
+            // send message
+          const ourSecretKey = await getMySecretKey();
+          if (!ourSecretKey) {
+            alert("Could not get your private key")
+             return;
+             }
+
+          if (!res[0]?.id.publicKey) {
+              Alert.alert(
+              "The user haven't set his keypair yet",
+               "Until the user generates the keypair, you cannot securely send him messages"
+              );
+              return;
+              }
+
+              //console.log("private key", ourSecretKey);
+
+              const sharedKey = box.before(
+              stringToUint8Array(res[0]?.id.publicKey),
+               ourSecretKey
+                 );
+               //console.log("shared key", sharedKey);
+
+               const encryptedMessage = encrypt(sharedKey, { message });
+              //console.log("encrypted message", encryptedMessage);
+
   
-  resetFields();
+                db.collection('messages').add({
+                 timestamp:firebase.firestore.FieldValue.serverTimestamp(),
+                 "chatroomID":id,
+                 "message":encryptedMessage,
+                 "sender":user.email, 
+                 "image":'',
+                 "audio":'',
+                 "time":Date.now(),
+                 new:0,
+                "status":"",
+                }).then((res)=>{
+              console.log("message sent here is ID:",res.id)
+             db.collection('messages').doc(res.id).update({
+               "status":"DELIVERED",
+              })
+             db.collection('chatroom').doc(id).update({
+              lastmessagetime:firebase.firestore.FieldValue.serverTimestamp(),
+              lastmessage:message,
+              new:user.email,
+              })
+            }).catch((error)=>{
+            console.log(error)
+            })
+  
+         resetFields();
+
+   
+};
+
+//get other users public key then call the above function which will encrypt and send the message
+const sendMessage = async ()=>{
+
+  await db.collection("users").where("email", "==", other)
+  .onSnapshot((querySnapshot) => {
+
+  const res = (querySnapshot.docs.map(doc => ({id: doc.data()})))
+  //other user key res[0]?.id.publicKey)
+  if(!res){
+    alert("User you are chating to is not available in database")
+    return;
+  }
+  getPK(res)
+})
+          
 }
+
+
+
   return (
     <KeyboardAvoidingView
       style={[styles.root, { height: isEmojiPickerOpen ? "50%" : "auto" }]}

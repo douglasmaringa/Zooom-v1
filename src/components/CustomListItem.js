@@ -4,6 +4,7 @@ import { db } from '../services/firebase'
 import { styles } from '../styles/CustomListItemStyles'
 import firebase from 'firebase'
 import { Text } from 'react-native-elements'
+import moment from 'moment';
 
 const CustomListItem = ({ id, data, enterChat }) => {
 
@@ -21,7 +22,7 @@ const CustomListItem = ({ id, data, enterChat }) => {
         }
     }, [])
 
-   
+   //console.log(moment(new Date(data.lastmessagetime.seconds*1000)).fromNow())
 
     return (
         <ListItem
@@ -45,13 +46,15 @@ const CustomListItem = ({ id, data, enterChat }) => {
                     ellipsizeMode="tail"
                     style={styles.listItemSubtitle}
                 >
-                    {data.lastmessage?<>{data.lastmessage}</>:<></>}
-                   
+                    {data.lastmessage?<>{data.lastmessage}  <Text style={{color:'gray'}}> {data?.lastmessagetime ?<>({moment(new Date(data.lastmessagetime.seconds*1000)).fromNow()})</>:<></>}</Text>
+            </>:<></>}
+                    
                 </ListItem.Subtitle>
+               
             </ListItem.Content>
             
             <Text style={{color:'white',padding:10}}> {data.new == other ?<>New</>:<></>}</Text>
-         
+           
               </ListItem>
     )
 }

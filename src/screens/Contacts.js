@@ -20,14 +20,17 @@ const Contacts = ({ navigation }) => {
     }
 
     useEffect(() => {
-        const unsubscribe = db.collection('users').onSnapshot(snapshot => (
-            setUsers(snapshot.docs.map(doc => ({
-                id: doc.id,
-                data: doc.data()
-            })))
+        var user = firebase.auth().currentUser;
+        
+        if(!user){
+            alert("you are not logged in")
+            return;
+        }
+        const unsubscribe = db.collection('users').where("email", "!=", user.email).orderBy('email', 'asc').onSnapshot(snapshot => (
+            setUsers(snapshot.docs.map(doc => ({id: doc.id,data: doc.data()})))
         ))
 
-        var user = firebase.auth().currentUser;
+       
 
         db.collection("users").where("email", "==", user.email)
         .onSnapshot((querySnapshot) => {
@@ -52,9 +55,9 @@ const Contacts = ({ navigation }) => {
             headerLeft: () => (<View />),
             headerRight: () => (
                 <View style={{ marginLeft: 20 }}>
-                    <TouchableOpacity activeOpacity={0.5} onPress={signOutUser}>
+                   <TouchableOpacity activeOpacity={0.5} onPress={()=>{navigation.navigate("Settings")}}>
                         <Ionicons
-                            name='exit-outline'
+                            name='settings'
                             size={25}
                             color='#1D51EF'
                             style={{ marginRight: 15 }}

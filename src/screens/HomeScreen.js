@@ -43,9 +43,9 @@ const HomeScreen = ({ navigation,route }) => {
             headerLeft: () => (<View />),
             headerRight: () => (
                 <View style={{ marginLeft: 20 }}>
-                    <TouchableOpacity activeOpacity={0.5} onPress={signOutUser}>
+                    <TouchableOpacity activeOpacity={0.5} onPress={()=>{navigation.navigate("Settings")}}>
                         <Ionicons
-                            name='exit-outline'
+                            name='settings'
                             size={25}
                             color='#1D51EF'
                             style={{ marginRight: 15 }}

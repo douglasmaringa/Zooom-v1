@@ -73,7 +73,10 @@ const ChatScreen = ({ navigation, route }) => {
             .onSnapshot((querySnapshot) => {
                 
                 console.log(querySnapshot.data().members)
-
+                 if(!querySnapshot.data()){
+                     alert("could not find chatroom")
+                     return;
+                 }
                 if(querySnapshot.data()){
                 var user = firebase.auth().currentUser;
                 if(querySnapshot.data().members[0] === user.email){

@@ -9,6 +9,7 @@ import AddChatScreen from './src/screens/AddChatScreen';
 import ChatScreen from './src/screens/ChatScreen';
 import { LogBox } from 'react-native';
 import Contacts from './src/screens/Contacts';
+import Settings from "./src/screens/Settings"
 
 LogBox.ignoreAllLogs()
 
@@ -56,6 +57,17 @@ export default function App() {
         <Stack.Screen
           name="Chat"
           component={ChatScreen}
+          options={{
+            headerStyle: {
+              backgroundColor: '#1e1d26',
+              elevation: 0
+            }
+          }}
+        />
+
+        <Stack.Screen
+          name="Settings"
+          component={Settings}
           options={{
             headerStyle: {
               backgroundColor: '#1e1d26',
