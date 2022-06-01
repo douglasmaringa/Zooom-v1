@@ -11,13 +11,15 @@ import {
   stringToUint8Array,
 } from "../utils/crypto";
 import moment from 'moment';
+import firebase from "firebase";
 
 const blue = "#3777f0";
 const grey = "lightgrey";
 
-const Message = ({me,other, message,route,show }) => {
+const GroupMessage = ({message,route }) => {
   const [user, setUser] = useState();
   const [isMe, setIsMe] = useState(false);
+  const [show, setShow] = useState(false);
   const [soundURI, setSoundURI] = useState(null);
   const [decryptedContent, setDecryptedContent] = useState("");
  
@@ -25,10 +27,10 @@ const Message = ({me,other, message,route,show }) => {
   const { width } = useWindowDimensions();
   
   useEffect(() => {
-    
-    setIsMe(message.sender === me);
+    var user = firebase.auth().currentUser;
+    setIsMe(message.sender === user.email);
   
-  }, [message,route,me]);
+  }, [message,route]);
 
   if (!message) {
     return <ActivityIndicator />;
@@ -36,54 +38,21 @@ const Message = ({me,other, message,route,show }) => {
   console.log("is me",isMe)
 
   useEffect(()=>{
-    
-       if(message.sender === other){
+    var user = firebase.auth().currentUser;
+       if(message.sender !== user.email){
          if(message.status != "READ"){
-          db.collection('messages').doc(message.id).update({
-            "status":"READ",
-            })
+          
             db.collection('chatroom').doc(message.chatroomID).update({
               "new":'',
               })
            }
          }
       
-  },[message,route,me])
+  },[message,route])
 
-  useEffect(() => {
+  
 
-    db.collection("users").where("email", "==", other)
-  .onSnapshot((querySnapshot) => {
-
-  const res = (querySnapshot.docs.map(doc => ({id: doc.data()})))
-  if (!message?.message || !res[0]?.id.publicKey) {
-    return;
-  }
-  //other user key res[0]?.id.publicKey)
-  decryptMessage(res);
-})
-
-   
-
-    
-
-   
-  }, [message,other]);
-
-  const decryptMessage = async (res) => {
-    const myKey = await getMySecretKey();
-    if (!myKey) {
-      return;
-    }
-    // decrypt message.content
-    const sharedKey = box.before(stringToUint8Array(res[0]?.id.publicKey), myKey);
-    console.log("sharedKey", sharedKey);
-    const decrypted = decrypt(sharedKey, message.message);
-    console.log("decrypted", decrypted);
-    setDecryptedContent(decrypted.message);
-  };
-
-  console.log("show",show)
+  
 
   return (
     <View
@@ -126,14 +95,21 @@ const Message = ({me,other, message,route,show }) => {
       )}
          </>):
          (<>
-         {!!decryptedContent && (
+         {!!message.message && (
            
         <Text style={{ color: isMe ? "black" : "white" ,marginRight:'auto'}}>
           {
-            isMe?(<>{decryptedContent}</>):
+            isMe?(<View style={{display:'flex'}}>
+                 <Text style={{color:'gray'}}>{message.sender}</Text> 
+            <Text style={{color:'black'}}>{message.message}</Text> 
+        <Text style={{fontSize:12,color:'gray',fontWeight:'400'}}>{moment(new Date(message?.timestamp?.seconds*1000)).format('LT')}</Text>
+
+      
+        </View>):
             (<View style={{display:'flex'}}>
-                <Text style={{color:'white'}}>{decryptedContent}</Text> 
-            <Text style={{fontSize:12,color:'#f5f5f5',fontWeight:'400'}}>{moment(new Date(message.timestamp.seconds*1000)).format('LT')}</Text>
+                <Text style={{color:'#f5f5f5'}}>{message.sender}</Text> 
+                <Text style={{color:'white'}}>{message.message}</Text> 
+            <Text style={{fontSize:12,color:'#f5f5f5',fontWeight:'400'}}>{moment(new Date(message?.timestamp?.seconds*1000)).format('LT')}</Text>
     
           
             </View>)
@@ -145,20 +121,7 @@ const Message = ({me,other, message,route,show }) => {
          </>)
        }
 
-          {isMe && !!message.status && message.status !== "SENT" && (
-            <View style={{display:'flex',flexDirection:'row'}}>
-            <Text style={{fontSize:12,color:'gray'}}>{moment(new Date(message.timestamp.seconds*1000)).format('LT')}</Text>
-            <Ionicons
-            name={
-              message.status === "DELIVERED" ? "checkmark" : "checkmark-done"
-            }
-            size={16}
-            color="gray"
-            style={{ marginHorizontal: 5 }}
-          />
-            </View>
           
-        )}
     </View>
   );
 };
@@ -193,4 +156,4 @@ const styles = StyleSheet.create({
 });
 
 
-export default Message;
+export default GroupMessage;

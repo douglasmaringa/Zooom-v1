@@ -1,13 +1,13 @@
 import React, { useLayoutEffect, useState, useEffect } from 'react'
 import { SafeAreaView, ScrollView, TouchableOpacity, View } from 'react-native'
-import CustomListItem from '../components/CustomListItem'
+import GroupCustomListItem from '../components/GroupCustomListItem'
 import { auth, db } from '../services/firebase'
 import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
 import { styles } from '../styles/HomeScreenStyles'
 import firebase from 'firebase'
 
-const HomeScreen = ({ navigation,route }) => {
+const GroupScreen = ({ navigation,route }) => {
 
     console.log(route.params)
 
@@ -22,7 +22,7 @@ const HomeScreen = ({ navigation,route }) => {
     useEffect(() => {
         var user = firebase.auth().currentUser;
 
-        const unsubscribe = db.collection("chatroom").where("members", "array-contains", user.email).orderBy('lastmessagetime', 'desc')
+        const unsubscribe = db.collection("Groupchatroom").where("members", "array-contains",user.email).orderBy('lastmessagetime', 'desc')
         .onSnapshot((querySnapshot) => {
            
             setChats(querySnapshot.docs.map(doc => ({
@@ -36,16 +36,16 @@ const HomeScreen = ({ navigation,route }) => {
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            title: 'Messages',
+            title: 'Groups',
             headerStyle: { backgroundColor: '#1e1d26', elevation: 0 },
             headerTintStyle: { color: '#fff' },
             headerTintColor: '#fff',
             headerLeft: () => (<View />),
             headerRight: () => (
                 <View style={{ marginLeft: 20 ,display:'flex',flexDirection:'row'}}>
-                    <TouchableOpacity activeOpacity={0.5} onPress={()=>{navigation.navigate("GroupHome")}}>
+                    <TouchableOpacity activeOpacity={0.5} onPress={()=>{navigation.navigate("Home")}}>
                         <Ionicons
-                            name='people-outline'
+                            name='person-outline'
                             size={25}
                             color='#1D51EF'
                             style={{ marginRight: 15 }}
@@ -66,20 +66,21 @@ const HomeScreen = ({ navigation,route }) => {
 
     const enterChat = (id, data,other) => {
         console.log(id)
-        navigation.navigate('Chat', {
+        navigation.navigate('GroupChat', {
             id: id,
             data: data,
             name:other
         })
     }
 
+    console.log("chats",chats)
     return (
         <SafeAreaView>
             <StatusBar style="light" />
 
             <ScrollView style={styles.container}>
                 {chats.map(({ id, data }) => (
-                    <CustomListItem
+                    <GroupCustomListItem
                         id={id}
                         data={data}
                         key={id}
@@ -90,7 +91,7 @@ const HomeScreen = ({ navigation,route }) => {
 
             <TouchableOpacity
                 style={styles.buttonAddChat}
-                onPress={() => navigation.navigate('Contacts')}
+                onPress={() => navigation.navigate('GroupContacts')}
             >
                 <Ionicons
                     name='add'
@@ -103,4 +104,4 @@ const HomeScreen = ({ navigation,route }) => {
     )
 }
 
-export default HomeScreen
+export default GroupScreen

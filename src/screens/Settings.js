@@ -69,7 +69,7 @@ const Settings = ({navigation}) => {
        
         const res = (querySnapshot.docs.map(doc => ({ id: doc.id,
           data: doc.data()})))
-        //console.log(res[0]?.id)
+        console.log(res)
         if(!res){
          Alert.alert("User not found!");
           return;
@@ -180,7 +180,7 @@ const Settings = ({navigation}) => {
     <View style={styles.container}>
        <View style={{display:'flex',paddingBottom:20,borderBottomColor:'gray',borderBottomWidth:0.5}}>
     {
-        user.image?(<>
+        user?(<>
          <Image
             source={{uri:user.image}}
             style={{
@@ -205,7 +205,7 @@ const Settings = ({navigation}) => {
                  }} source={require("../../assets/icon.png")} />
        </>)
     }
-     <Text style={{color:'white',marginLeft:'auto',marginRight:'auto',marginTop:5,fontSize:18,fontWeight:'700'}}>@{user.name}</Text>
+     <Text style={{color:'white',marginLeft:'auto',marginRight:'auto',marginTop:5,fontSize:18,fontWeight:'700'}}>@{user?.name}</Text>
     <Text style={{color:'white',marginLeft:'auto',marginRight:'auto',marginTop:5,fontSize:14,fontWeight:'400'}}>2022 - Present</Text>
    </View>
 

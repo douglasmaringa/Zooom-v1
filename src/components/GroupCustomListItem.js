@@ -6,7 +6,7 @@ import firebase from 'firebase'
 import { Text } from 'react-native-elements'
 import moment from 'moment';
 
-const CustomListItem = ({ id, data, enterChat }) => {
+const GroupCustomListItem = ({ id, data, enterChat }) => {
 
     const [chatMessages, setChatMessages] = useState([])
     const[other,setOther]=useState("")
@@ -44,13 +44,13 @@ const CustomListItem = ({ id, data, enterChat }) => {
             <Avatar
                 size={50}
                 rounded
-                source={{ uri: user || 'https://secure.gravatar.com/avatar/d3afc60628a78f856952f6d76a2f37b8?s=150&r=g&d=https://delivery.farmina.com.br/wp-content/plugins/userswp/assets/images/no_profile.png' }}
+                source={{ uri: 'https://cdn.vectorstock.com/i/1000x1000/27/54/people-group-logo-design-vector-14542754.webp' }}
             
             />
 
             <ListItem.Content>
                 <ListItem.Title style={styles.listItemTitle}>
-                    {other}
+                    {data.name}
                 </ListItem.Title>
 
                 <ListItem.Subtitle
@@ -81,4 +81,4 @@ const CustomListItem = ({ id, data, enterChat }) => {
     )
 }
 
-export default CustomListItem
+export default GroupCustomListItem

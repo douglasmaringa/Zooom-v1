@@ -112,6 +112,7 @@ const Contacts = ({ navigation }) => {
                     //timestamp:firebase.firestore.FieldValue.serverTimestamp(),
                     members:[data.email,user.email],
                     lastmessage:"",
+                    lastmessagetime:firebase.firestore.FieldValue.serverTimestamp(),
                     newMessages:0,
                     show:false
                 }).then(res=>{
