@@ -128,18 +128,20 @@ const Message = ({me,other, message,route,show }) => {
          (<>
          {!!decryptedContent && (
            
-        <Text style={{ color: isMe ? "black" : "white" ,marginRight:'auto'}}>
+        <>
           {
-            isMe?(<>{decryptedContent}</>):
-            (<View style={{display:'flex'}}>
+            isMe?(
+            <Text style={{color:'black',marginRight:'auto'}}>{decryptedContent}</Text>
+            ):
+            (
+            <View style={{display:'flex'}}>
                 <Text style={{color:'white'}}>{decryptedContent}</Text> 
-            <Text style={{fontSize:12,color:'#f5f5f5',fontWeight:'400'}}>{moment(new Date(message.timestamp.seconds*1000)).format('LT')}</Text>
-    
-          
-            </View>)
+                <Text style={{fontSize:12,color:'#f5f5f5',fontWeight:'400'}}>{moment(new Date(message.timestamp.seconds*1000)).format('LT')}</Text>
+            </View>
+            )
           }
         
-        </Text>
+       </>
       )
       }
          </>)

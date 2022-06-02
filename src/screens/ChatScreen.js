@@ -13,7 +13,7 @@ import { Header } from '@react-navigation/stack';
 
 const ChatScreen = ({ navigation, route }) => {
 
-    console.log(route.params)
+    console.log(route?.params)
 
     const [input, setInput] = useState('')
     const [messages, setMessages] = useState([])
@@ -26,7 +26,7 @@ const ChatScreen = ({ navigation, route }) => {
             headerTitleAlign: 'center',
             headerTitle: () => (
                 <Text style={styles.headerTitle} onPress={chatinfo}>
-                    {route.params.name}
+                    {route?.params?.name}
                 </Text>
             ),
             headerLeft: () => (
@@ -57,7 +57,7 @@ const ChatScreen = ({ navigation, route }) => {
     const sendMessage = () => {
         Keyboard.dismiss()
 
-        db.collection('chats').doc(route.params.id).collection('messages').add({
+        db.collection('chats').doc(route?.params?.id).collection('messages').add({
             timestamp: new Date(),
             message: input,
             displayName: auth.currentUser.displayName,
@@ -71,7 +71,7 @@ const ChatScreen = ({ navigation, route }) => {
 
     useEffect(() => {
         
-            db.collection("chatroom").doc(route.params.id)
+            db.collection("chatroom").doc(route?.params?.id)
             .onSnapshot((querySnapshot) => {
                 
                 console.log(querySnapshot.data().members)
@@ -93,7 +93,7 @@ const ChatScreen = ({ navigation, route }) => {
                
             })    
 
-            db.collection("messages").where("chatroomID","==",route.params.id).orderBy('timestamp', 'asc')
+            db.collection("messages").where("chatroomID","==",route?.params?.id).orderBy('timestamp', 'asc')
             .onSnapshot((querySnapshot) => {
                     setMessages(querySnapshot.docs.map(doc=>({ ...doc.data(), id: doc.id })));
                
@@ -158,7 +158,7 @@ const ChatScreen = ({ navigation, route }) => {
                                     color='#1D51EF'
                                 />
                             </TouchableOpacity>*/}
-                            <MessageInput id={route.params.id}/>
+                            <MessageInput id={route?.params?.id}/>
                         </View>
                     </>
                 </TouchableWithoutFeedback>

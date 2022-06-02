@@ -73,7 +73,7 @@ const Contacts = ({ navigation }) => {
        //check if users have exsisting chat
         var user = firebase.auth().currentUser;
         console.log(user.email)
-        db.collection("users").where("email", "==", user.email)
+        db.collection("users").where("email", "==", user?.email)
         .onSnapshot((querySnapshot) => {
           
           const res = querySnapshot.docs.map(doc=>({ ...doc.data(), id: doc.id }))
@@ -92,7 +92,7 @@ const Contacts = ({ navigation }) => {
                 
               //putting chat room id in current user user's object.
                  db.collection('users').doc(id).update({
-                  chatroom: firebase.firestore.FieldValue.arrayUnion(user.email)
+                  chatroom: firebase.firestore.FieldValue.arrayUnion(user?.email)
                   }).then((res)=>{
                       console.log("added you to your friends users object")
                   }).catch((e)=>{
@@ -101,7 +101,7 @@ const Contacts = ({ navigation }) => {
 
                 //putting chat room id in your user user's object.
                 db.collection('users').doc(me).update({
-                    chatroom: firebase.firestore.FieldValue.arrayUnion(data.email)
+                    chatroom: firebase.firestore.FieldValue.arrayUnion(data?.email)
                     }).then((res)=>{
                         console.log("added your friend to your user object")
                     }).catch((e)=>{
@@ -117,10 +117,10 @@ const Contacts = ({ navigation }) => {
                     show:false
                 }).then(res=>{
                   
-                console.log(`${data.email} has been added to your chats`)
+                console.log(`${data?.email} has been added to your chats`)
                 navigation.navigate('Chat', {
                     id: res.id,
-                    name: data.name
+                    name: data?.name
                 })
                 console.log(res.id);
                 }).catch((e)=>{
@@ -146,7 +146,7 @@ const Contacts = ({ navigation }) => {
             <StatusBar style="light" />
 
             <ScrollView style={styles.container}>
-                {users.map(({ id, data }) => (
+                {users?.map(({ id, data }) => (
                     <Contact
                         id={id}
                         data={data}

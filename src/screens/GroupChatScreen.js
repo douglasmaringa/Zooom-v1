@@ -13,7 +13,7 @@ import { Header } from '@react-navigation/stack';
 
 const GroupChatScreen = ({ navigation, route }) => {
 
-    console.log(route.params)
+    console.log(route?.params)
 
     const [input, setInput] = useState('')
     const [messages, setMessages] = useState([])
@@ -55,7 +55,7 @@ const GroupChatScreen = ({ navigation, route }) => {
     const sendMessage = () => {
         Keyboard.dismiss()
 
-        db.collection('chats').doc(route.params.id).collection('messages').add({
+        db.collection('chats').doc(route?.params?.id).collection('messages').add({
             timestamp: new Date(),
             message: input,
             displayName: auth.currentUser.displayName,
@@ -69,20 +69,21 @@ const GroupChatScreen = ({ navigation, route }) => {
 
     useEffect(() => {
         
-            db.collection("Groupchatroom").doc(route.params.id)
+            db.collection("Groupchatroom").doc(route?.params?.id)
             .onSnapshot((querySnapshot) => {
                 
-                console.log(querySnapshot.data().members)
+                
                  if(!querySnapshot.data()){
                      alert("could not find chatroom")
                      return;
                  }
-               
+                 console.log(querySnapshot.data().members)
                
             })    
 
             db.collection("Groupmessages").where("chatroomID","==",route.params.id).orderBy('timestamp', 'asc')
             .onSnapshot((querySnapshot) => {
+                
                     setMessages(querySnapshot.docs.map(doc=>({ ...doc.data(), id: doc.id })));
                
             })    
@@ -145,7 +146,7 @@ const GroupChatScreen = ({ navigation, route }) => {
                                     color='#1D51EF'
                                 />
                             </TouchableOpacity>*/}
-                            <GroupMessageInput id={route.params.id}/>
+                            <GroupMessageInput id={route?.params?.id}/>
                         </View>
                     </>
                 </TouchableWithoutFeedback>

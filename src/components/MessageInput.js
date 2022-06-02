@@ -229,6 +229,7 @@ const MessageInput = ({id }) => {
     if (!soundURI) {
       return;
     }
+    setLoading(true)
     const uriParts = soundURI.split(".");
     const extenstion = uriParts[uriParts.length - 1];
     const blob = await getBlob(soundURI);
@@ -432,6 +433,11 @@ const sendMessage = async ()=>{
       )}
 
       {soundURI && <AudioPlayer soundURI={soundURI} />}
+      {
+        soundURI?(<>
+         {loading ? <ActivityIndicator size="large" color="#C7C6CD" /> : null}
+        </>):(<></>)
+      }
 
       <View style={styles.row}>
         <View style={styles.inputContainer}>

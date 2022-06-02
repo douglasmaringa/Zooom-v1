@@ -13,19 +13,21 @@ const GroupChatInfo = ({route}) => {
     //console.log("chatinfo",route.params)
 
     useEffect(() => {
-        db.collection("Groupchatroom").doc(route.params.ChatroomID)
+        db.collection("Groupchatroom").doc(route?.params?.ChatroomID)
         .onSnapshot((querySnapshot) => {
             
-            console.log(querySnapshot.data().members)
-            setChat(querySnapshot.data())
+           
              if(!querySnapshot.data()){
                  alert("could not find chatroom")
                  return;
              }
            
+              
+             //console.log(querySnapshot.data().members)
+             setChat(querySnapshot.data())
            
         })    
-    }, [])
+    }, [route])
     
     
 
@@ -48,7 +50,7 @@ const GroupChatInfo = ({route}) => {
     }
      <Text style={{color:'white',marginLeft:'auto',marginRight:'auto',marginTop:5,fontSize:18,fontWeight:'700'}}>Group chat info</Text>
     
-     <Text style={{color:'white',marginLeft:'auto',marginRight:'auto',marginTop:5,fontSize:18,fontWeight:'700'}}>@{route.params.name}</Text>
+     <Text style={{color:'white',marginLeft:'auto',marginRight:'auto',marginTop:5,fontSize:18,fontWeight:'700'}}>@{route?.params?.name}</Text>
     <Text style={{color:'white',marginLeft:'auto',marginRight:'auto',marginTop:5,fontSize:14,fontWeight:'400'}}>2022 - Present</Text>
    </View>
 

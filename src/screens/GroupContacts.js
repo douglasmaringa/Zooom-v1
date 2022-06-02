@@ -170,7 +170,7 @@ const GroupContacts = ({ navigation }) => {
             <Text style={{paddingLeft:10,paddingVertical:4,color:'white',backgroundColor:'gray'}}>Members {members.length}</Text>
                 
             <ScrollView style={styles.container}>
-                {users.map(({ id, data }) => (
+                {users?.map(({ id, data }) => (
                     <GroupContact
                         id={id}
                         data={data}

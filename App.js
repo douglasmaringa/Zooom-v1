@@ -15,6 +15,9 @@ import GroupHome from "./src/screens/GroupHome"
 import GroupContacts from "./src/screens/GroupContacts"
 import GroupChatScreen from "./src/screens/GroupChatScreen"
 import GroupChatInfo from "./src/screens/GroupChatInfo"
+import ProfileSettings from './src/screens/ProfileSettings';
+import PrivacySettings from './src/screens/PrivacySettings';
+import PaymentSettings from './src/screens/PaymentSettings';
 
 LogBox.ignoreAllLogs()
 
@@ -128,6 +131,39 @@ export default function App() {
         <Stack.Screen
           name="Settings"
           component={Settings}
+          options={{
+            headerStyle: {
+              backgroundColor: '#1e1d26',
+              elevation: 0
+            }
+          }}
+        />
+
+<Stack.Screen
+          name="ProfileSettings"
+          component={ProfileSettings}
+          options={{
+            headerStyle: {
+              backgroundColor: '#1e1d26',
+              elevation: 0
+            }
+          }}
+        />
+
+<Stack.Screen
+          name="PrivacySettings"
+          component={PrivacySettings}
+          options={{
+            headerStyle: {
+              backgroundColor: '#1e1d26',
+              elevation: 0
+            }
+          }}
+        />
+
+<Stack.Screen
+          name="PaymentSettings"
+          component={PaymentSettings}
           options={{
             headerStyle: {
               backgroundColor: '#1e1d26',

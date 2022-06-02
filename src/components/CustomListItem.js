@@ -24,7 +24,7 @@ const CustomListItem = ({ id, data, enterChat }) => {
     }, [])
 
     useEffect(() => {
-        db.collection("users").where("email","==",other)
+       db.collection("users").where("email","==",other)
         .onSnapshot((querySnapshot) => {
                 if(!querySnapshot.docs.map(doc=>({ ...doc.data(), id: doc.id }))){
                     alert("cannot get users image in Homescreen")
@@ -32,7 +32,8 @@ const CustomListItem = ({ id, data, enterChat }) => {
                 }
                 setUser(querySnapshot.docs.map(doc=>({ ...doc.data(), id: doc.id }))[0]?.image);
            
-        })    
+        })   
+        
     }, [other])
 
     return (
