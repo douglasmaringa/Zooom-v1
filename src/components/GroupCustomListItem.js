@@ -75,7 +75,7 @@ const GroupCustomListItem = ({ id, data, enterChat }) => {
                
             </ListItem.Content>
             
-            <Text style={{color:'white',padding:10}}> {data.new == other ?<>New</>:<></>}</Text>
+            <Text style={{color:'white',padding:10}}> </Text>
            
               </ListItem>
     )
