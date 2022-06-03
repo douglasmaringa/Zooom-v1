@@ -11,7 +11,9 @@ import Message from '../components/Message'
 import { Header } from '@react-navigation/stack';
 
 
+
 const ChatScreen = ({ navigation, route }) => {
+    
 
     console.log(route?.params)
 
@@ -100,6 +102,8 @@ const ChatScreen = ({ navigation, route }) => {
             })    
         
     }, [route])
+
+   
 
     console.log("me",me)
     console.log("other",other)

@@ -41,6 +41,7 @@ const MessageInput = ({id }) => {
   const [message, setMessage] = useState("");
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
   const [image, setImage] = useState(null);
+  const [video, setVideo] = useState(null);
   const [progress, setProgress] = useState(0);
   const [recording, setRecording] = useState(null);
   const [soundURI, setSoundURI] = useState(null);
@@ -81,7 +82,10 @@ const MessageInput = ({id }) => {
       sendAudio();
     } else if (message) {
       sendMessage();
-    } else {
+    } else if (video) {
+      sendVideo();
+    }
+     else {
       onPlusClicked();
     }
   };
@@ -92,6 +96,7 @@ const MessageInput = ({id }) => {
     setImage(null);
     setProgress(0);
     setSoundURI(null);
+    setVideo(null);
     
   };
 
@@ -115,6 +120,7 @@ const MessageInput = ({id }) => {
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       aspect: [4, 3],
+     
     });
 
     if (!result.cancelled) {
@@ -122,10 +128,81 @@ const MessageInput = ({id }) => {
     }
   };
 
+  // Video picker
+  const takeVideo = async () => {
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+      aspect: [4, 3],
+      videoQuality: 'medium',
+      durationLimit: 5,
+      thumbnail: true,
+      allowsEditing: true,
+    });
+
+    if (!result.cancelled) {
+      setVideo(result.uri);
+    }
+  };
+
+  console.log("video",video)
+
   const progressCallback = (progress) => {
     setProgress(progress.loaded / progress.total);
   };
 
+  const sendVideo = async () => {
+    setLoading(true)
+
+    if (!video) {
+      return;
+    }
+    const blob = await getBlob(video);
+   
+
+    const uploadTask = storage.ref(`/videos/${video}`).put(blob)
+    uploadTask.on('state_changed',(snapShot)=>{
+        console.log(snapShot)
+    },(err)=>{
+      console.log(JSON.stringify(err));
+      setLoading(false)
+    },()=>{
+        storage.ref('videos').child(video).getDownloadURL().then(firebaseUrl=>{
+            
+          console.log(firebaseUrl)
+         
+           
+          if(firebaseUrl){
+            var user = firebase.auth().currentUser;
+
+            db.collection('messages').add({
+              timestamp:firebase.firestore.FieldValue.serverTimestamp(),
+              "chatroomID":id,
+              "message":"",
+              "sender":user.email, 
+              "image":'',
+              "audio":'',
+              "video":firebaseUrl,
+              "time":Date.now(),
+              new:1,
+              "status":"",
+            }).then((res)=>{
+              console.log("message sent here is ID:",res.id)
+              db.collection('messages').doc(res.id).update({
+                "status":"DELIVERED",
+                })
+              }).catch((error)=>{
+                console.log(error)
+              })
+  
+            setLoading(false)
+            resetFields();
+          }
+        
+        })
+    })
+
+    
+  };
   
   const sendImage = async () => {
     setLoading(true)
@@ -158,6 +235,7 @@ const MessageInput = ({id }) => {
               "sender":user.email, 
               "image":firebaseUrl,
               "audio":'',
+              "video":'',
               "time":Date.now(),
               new:1,
               "status":"",
@@ -256,6 +334,7 @@ const MessageInput = ({id }) => {
               "sender":user.email, 
               "image":'',
               "audio":firebaseUrl,
+              "video":'',
               "time":Date.now(),
               new:1,
               "status":"",
@@ -344,6 +423,7 @@ useEffect(() => {
                  "sender":user.email, 
                  "image":'',
                  "audio":'',
+                 "video":'',
                  "time":Date.now(),
                  new:0,
                 "status":"",
@@ -432,6 +512,46 @@ const sendMessage = async ()=>{
         </View>
       )}
 
+       {video && (
+        <View style={styles.sendImageContainer}>
+          <Image
+            source={{ uri:'https://1000logos.net/wp-content/uploads/2017/08/Snapchat-logo-1536x864.png'}}
+            style={{ width: 100, height: 100, borderRadius: 10 }}
+          />
+
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "flex-start",
+              alignSelf: "flex-end",
+            }}
+          >
+            <View
+              style={{
+                height: 5,
+                borderRadius: 5,
+                backgroundColor: "#3777f0",
+                width: `${progress * 100}%`,
+              }}
+            />
+             {loading ? <ActivityIndicator size="large" color="#C7C6CD" /> : null}
+          </View>
+            
+            
+          <Pressable onPress={() => setVideo(null)}>
+            <AntDesign
+              name="close"
+              size={24}
+              color="black"
+              style={{ margin: 5 ,color:'#f5f5f5'}}
+            />
+          </Pressable>
+
+          
+         
+        </View>
+      )}
+
       {soundURI && <AudioPlayer soundURI={soundURI} />}
       {
         soundURI?(<>
@@ -442,12 +562,10 @@ const sendMessage = async ()=>{
       <View style={styles.row}>
         <View style={styles.inputContainer}>
           <Pressable
-            onPress={() =>
-              setIsEmojiPickerOpen((currentValue) => !currentValue)
-            }
+            onPress={takeVideo}
           >
-            <SimpleLineIcons
-              name="emotsmile"
+            <Ionicons
+              name="logo-snapchat"
               size={24}
               color="#f5f5f5"
               style={styles.icon}
@@ -491,7 +609,7 @@ const sendMessage = async ()=>{
         </View>
 
         <Pressable onPress={onPress} style={styles.buttonContainer}>
-          {message || image || soundURI ? (
+          {message || image || soundURI || video ? (
             <Ionicons name="send" size={18} color="white" />
           ) : (
             <AntDesign name="plus" size={24} color="white" />

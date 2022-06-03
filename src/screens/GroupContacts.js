@@ -14,6 +14,7 @@ const GroupContacts = ({ navigation }) => {
     const [me, setMe] = useState([])
     const [members, setMembers] = useState([])
     const [name, setName] = useState('')
+    const [prev, setPrev] = useState('')
 
     const signOutUser = () => {
         auth.signOut().then(() => {
@@ -125,12 +126,19 @@ const GroupContacts = ({ navigation }) => {
 
     const addToGroup = (id, data) => {
 
-       console.log(data.email)
+       console.log("prev",prev)
+       if(!members.includes(data.email)){
         setMembers([...members,data.email])
-        var user = firebase.auth().currentUser;
-        if(!members.includes(user.email)){
-            setMembers([...members,user.email])
         }
+       //setMembers([...members,data.email])
+        var user = firebase.auth().currentUser;
+          //code to add the group owner inside since he is not in contacts 
+            if(!members.includes(user.email)){
+                setMembers([...members,user.email,data.email])
+            }
+       
+        
+    
     }
     console.log("members",members)
 

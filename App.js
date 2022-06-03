@@ -18,11 +18,12 @@ import GroupChatInfo from "./src/screens/GroupChatInfo"
 import ProfileSettings from './src/screens/ProfileSettings';
 import PrivacySettings from './src/screens/PrivacySettings';
 import PaymentSettings from './src/screens/PaymentSettings';
+import { usePreventScreenCapture } from 'expo-screen-capture';
 
 LogBox.ignoreAllLogs()
 
 export default function App() {
-
+  usePreventScreenCapture();
   const Stack = createStackNavigator()
 
   const globalScreenOptions = {

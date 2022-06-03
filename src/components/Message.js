@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ActivityIndicator,Image } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator,Image, TouchableOpacity,Alert} from "react-native";
 import { useWindowDimensions } from "react-native";
 import AudioPlayer from "./AudioPlayer";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,6 +11,8 @@ import {
   stringToUint8Array,
 } from "../utils/crypto";
 import moment from 'moment';
+import VideoPlayer from "./VideoPlayer";
+
 
 const blue = "#3777f0";
 const grey = "lightgrey";
@@ -85,6 +87,27 @@ const Message = ({me,other, message,route,show }) => {
 
   console.log("show",show)
 
+  const deleteMessage = ()=>{
+    Alert.alert(
+      "Delete Message",
+      "Are you sure you want to delete this message",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        },
+        { text: "OK", onPress: () => {
+          db.collection("messages").doc(message?.id).delete().then(() => {
+            console.log("Document successfully deleted!");
+        }).catch((error) => {
+            console.error("Error removing document: ", error);
+        });
+        } }
+      ]
+    );
+
+  }
   return (
     <View
       style={[
@@ -97,6 +120,7 @@ const Message = ({me,other, message,route,show }) => {
         <View style={{ marginBottom: message.content ? 10 : 0 }}>
           {
             show?(<>
+
             <Image
             source={{uri:'https://play-lh.googleusercontent.com/19GU_MtEUEYBvY-TUH6IF96d8AyGYYZoeob1eDQymFXaQb9qtZADzAIFKWoYPFtDci4=w480-h960-rw'}}
             style={{ width: width * 0.7, aspectRatio: 4 / 3 }}
@@ -116,6 +140,7 @@ const Message = ({me,other, message,route,show }) => {
         </View>
       ):(<></>)}
       {message.audio ? (<><AudioPlayer soundURI={message?.audio} /></>):(<></>)}
+      {message.video ? (<><VideoPlayer videoURL={message?.video} /></>):(<></>)}
        {
          show?
          (<>
@@ -131,7 +156,9 @@ const Message = ({me,other, message,route,show }) => {
         <>
           {
             isMe?(
+            
             <Text style={{color:'black',marginRight:'auto'}}>{decryptedContent}</Text>
+           
             ):
             (
             <View style={{display:'flex'}}>
@@ -148,6 +175,7 @@ const Message = ({me,other, message,route,show }) => {
        }
 
           {isMe && !!message.status && message.status !== "SENT" && (
+            <TouchableOpacity style={{marginRight:'auto'}} onLongPress={deleteMessage}>
             <View style={{display:'flex',flexDirection:'row'}}>
             <Text style={{fontSize:12,color:'gray'}}>{moment(new Date(message.timestamp.seconds*1000)).format('LT')}</Text>
             <Ionicons
@@ -159,7 +187,7 @@ const Message = ({me,other, message,route,show }) => {
             style={{ marginHorizontal: 5 }}
           />
             </View>
-          
+            </TouchableOpacity>
         )}
     </View>
   );
