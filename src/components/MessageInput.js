@@ -359,10 +359,10 @@ const MessageInput = ({id }) => {
 
 //know which user is which so we can fetch there user objects to get the public key
 useEffect(() => {
-        
+  let mounted = true
   db.collection("chatroom").doc(id)
   .onSnapshot((querySnapshot) => {
-      
+    if (mounted) {
       console.log(querySnapshot.data().members)
       if(!querySnapshot.data()){
         alert("could not find user line 288")
@@ -378,9 +378,12 @@ useEffect(() => {
         setMe(querySnapshot?.data().members[1])
         }
       }
-     
+    }
   })    
-
+  return function cleanup() {
+    mounted = false
+    console.log("component unmounted")
+}
 
 }, [id])
 

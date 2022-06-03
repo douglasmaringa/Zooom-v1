@@ -35,9 +35,11 @@ const GroupMessage = ({message,route }) => {
   if (!message) {
     return <ActivityIndicator />;
   }
-  console.log("is me",isMe)
+  //console.log("is me",isMe)
 
   useEffect(()=>{
+    let mounted = true
+    if (mounted) {
     var user = firebase.auth().currentUser;
        if(message.sender !== user.email){
          if(message.status != "READ"){
@@ -47,7 +49,11 @@ const GroupMessage = ({message,route }) => {
               })
            }
          }
-      
+        }
+         return function cleanup() {
+          mounted = false
+          console.log("component unmounted")
+      }
   },[message,route])
 
   

@@ -29,6 +29,7 @@ const CustomListItem = ({ id, data, enterChat,route }) => {
     console.log(data)
 
     useEffect(() => {
+     
         var user = firebase.auth().currentUser;
         if(data.members[0] === user.email){
             setOther(data.members[1])
@@ -39,15 +40,21 @@ const CustomListItem = ({ id, data, enterChat,route }) => {
     }, [])
 
     useEffect(() => {
+      let mounted = true
        db.collection("users").where("email","==",other)
         .onSnapshot((querySnapshot) => {
+          if (mounted) {
                 if(!querySnapshot.docs.map(doc=>({ ...doc.data(), id: doc.id }))){
                     alert("cannot get users image in Homescreen")
                     return;
                 }
                 setUser(querySnapshot.docs.map(doc=>({ ...doc.data(), id: doc.id }))[0]?.image);
-           
+              }
         })   
+        return function cleanup() {
+          mounted = false
+          console.log("component unmounted")
+      }
         
     }, [other])
 

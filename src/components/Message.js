@@ -35,10 +35,11 @@ const Message = ({me,other, message,route,show }) => {
   if (!message) {
     return <ActivityIndicator />;
   }
-  console.log("is me",isMe)
+  //console.log("is me",isMe)
 
   useEffect(()=>{
-    
+    let mounted = true
+    if (mounted) {
        if(message.sender === other){
          if(message.status != "READ"){
           db.collection('messages').doc(message.id).update({
@@ -49,24 +50,32 @@ const Message = ({me,other, message,route,show }) => {
               })
            }
          }
-      
+        }
+         return function cleanup() {
+          mounted = false
+          console.log("component unmounted")
+      }
   },[message,route,me])
 
   useEffect(() => {
-
+    let mounted = true
     db.collection("users").where("email", "==", other)
   .onSnapshot((querySnapshot) => {
-
+    if (mounted) {
   const res = (querySnapshot.docs.map(doc => ({id: doc.data()})))
   if (!message?.message || !res[0]?.id.publicKey) {
     return;
   }
   //other user key res[0]?.id.publicKey)
   decryptMessage(res);
+}
 })
 
    
-
+return function cleanup() {
+  mounted = false
+  console.log("component unmounted")
+}
     
 
    
@@ -85,7 +94,7 @@ const Message = ({me,other, message,route,show }) => {
     setDecryptedContent(decrypted.message);
   };
 
-  console.log("show",show)
+  //console.log("show",show)
 
   const deleteMessage = ()=>{
     Alert.alert(

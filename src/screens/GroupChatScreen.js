@@ -66,31 +66,87 @@ const GroupChatScreen = ({ navigation, route }) => {
         setInput('')
     }
 
-
+/*
     useEffect(() => {
-        
+        let mounted = true
             db.collection("Groupchatroom").doc(route?.params?.id)
             .onSnapshot((querySnapshot) => {
-                
+                if (mounted) {
                 
                  if(!querySnapshot.data()){
                      alert("could not find chatroom")
                      return;
                  }
                  console.log(querySnapshot.data().members)
-               
+                }
             })    
 
             db.collection("Groupmessages").where("chatroomID","==",route.params.id).orderBy('timestamp', 'asc')
             .onSnapshot((querySnapshot) => {
-                
+                if (mounted) {
                     setMessages(querySnapshot.docs.map(doc=>({ ...doc.data(), id: doc.id })));
-               
+                }
             })    
+
+            return function cleanup() {
+                mounted = false
+                console.log("component unmounted")
+            }
         
     }, [route])
+*/
 
+    const[last,setLast]=useState([])
+   //fetches chat room data in paginated manner
+   useEffect(() => {
+    let mounted = true
+    db.collection("Groupchatroom").doc(route?.params?.id)
+            .onSnapshot((querySnapshot) => {
+                if (mounted) {
+                
+                 if(!querySnapshot.data()){
+                     alert("could not find chatroom")
+                     return;
+                 }
+                 console.log(querySnapshot.data().members)
+                }
+            })    
+        //pagination
+    const fetchData = async () => {
+       await db.collection("Groupmessages").where("chatroomID","==",route?.params?.id).orderBy('timestamp', 'desc')
+        .limit(10)
+        .onSnapshot((querySnapshot) => {
+      setMessages(querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+      setLast(querySnapshot.docs[querySnapshot.docs.length-1])
+        })
+    }
+    fetchData();
+  }, []);
+
+  const showNext = () => {
+      if(!last){return;}
+
+    const fetchNextData = async () => {
+        const array = [];
+      const data = await db.collection("Groupmessages").where("chatroomID","==",route?.params?.id).orderBy('timestamp', 'desc')
+      .startAfter(last)  
+      .limit(10)
+        .get();
+        array.push(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
+        //setMessages(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
+        if(messages.length < 0){
+            setMessages(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+        }else{
+            setMessages([...messages,...data.docs.map((doc) => ({ ...doc.data(), id: doc.id }))]);
+        }
+        
+        setLast(data.docs[data.docs.length-1])
+    };
    
+    fetchNextData();
+  };
+
+  console.log("last",messages)
 
     const chatinfo = ()=>{
         navigation.navigate('GroupChatInfo', {
@@ -111,11 +167,14 @@ const GroupChatScreen = ({ navigation, route }) => {
     >
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <>
+                    <TouchableOpacity style={{textAlign:'center',padding:5,margin:'auto'}} onPress={showNext}>
+                        <Text style={{textAlign:'center',color:'gray',fontWeight:'700'}}>Load more</Text>
+                    </TouchableOpacity>
                     <FlatList
                        
                        renderItem={({ item }) => <GroupMessage message={item}/> }
                        inverted
-                       data={[...messages].reverse()}
+                       data={[...messages]}
                          />
                         {/*<ScrollView contentContainerStyle={{ paddingTop: 15, }}>
                             {messages.map((e) => (
