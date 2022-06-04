@@ -13,27 +13,17 @@ import {
   ScrollView
 } from "react-native";
 import {
-  SimpleLineIcons,
   Feather,
-  MaterialCommunityIcons,
   AntDesign,
   Ionicons,
 } from "@expo/vector-icons";
 import firebase from "firebase";
 import { db,storage} from "../services/firebase";
 
-import EmojiSelector from "react-native-emoji-selector";
+
 import * as ImagePicker from "expo-image-picker";
-import { v4 as uuidv4 } from "uuid";
-import { Audio, AVPlaybackStatus } from "expo-av";
-import AudioPlayer from "./AudioPlayer";
 import { Header } from '@react-navigation/stack';
-import { box } from "tweetnacl";
-import {
-  encrypt,
-  getMySecretKey,
-  stringToUint8Array,
-} from "../utils/crypto";
+
 
 
 
@@ -42,11 +32,8 @@ const GroupMessageInput = ({id }) => {
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
   const [image, setImage] = useState(null);
   const [progress, setProgress] = useState(0);
-  const [recording, setRecording] = useState(null);
-  const [soundURI, setSoundURI] = useState(null);
   const[loading,setLoading]= useState(false)
-  const [me, setMe] = useState("")
-  const [other, setOther] = useState("")
+ 
 
   
 
@@ -56,7 +43,7 @@ const GroupMessageInput = ({id }) => {
         const libraryResponse =
           await ImagePicker.requestMediaLibraryPermissionsAsync();
         const photoResponse = await ImagePicker.requestCameraPermissionsAsync();
-        await Audio.requestPermissionsAsync();
+       
 
         if (
           libraryResponse.status !== "granted" ||
@@ -77,8 +64,6 @@ const GroupMessageInput = ({id }) => {
   const onPress = () => {
     if (image) {
       sendImage();
-    } else if (soundURI) {
-      sendAudio();
     } else if (message) {
       sendMessage();
     } else {
@@ -91,7 +76,7 @@ const GroupMessageInput = ({id }) => {
     setIsEmojiPickerOpen(false);
     setImage(null);
     setProgress(0);
-    setSoundURI(null);
+   
     
   };
 
@@ -184,101 +169,11 @@ const GroupMessageInput = ({id }) => {
     return blob;
   };
 
-  async function startRecording() {
-    try {
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
+  
 
-      console.log("Starting recording..");
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-      );
-      setRecording(recording);
-      console.log("Recording started");
-    } catch (err) {
-      console.error("Failed to start recording", err);
-    }
-  }
 
-  async function stopRecording() {
-    console.log("Stopping recording..");
-    if (!recording) {
-      return;
-    }
-
-    setRecording(null);
-    await recording.stopAndUnloadAsync();
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: false,
-    });
-
-    const uri = recording.getURI();
-    console.log("Recording stopped and stored at", uri);
-    if (!uri) {
-      return;
-    }
-    setSoundURI(uri);
-  }
-
-  //send audio to backend 
-  const sendAudio = async () => {
-    if (!soundURI) {
-      return;
-    }
-    const uriParts = soundURI.split(".");
-    const extenstion = uriParts[uriParts.length - 1];
-    const blob = await getBlob(soundURI);
-    
-    const uploadTask = storage.ref(`/audio/${soundURI}`).put(blob)
-    uploadTask.on('state_changed',(snapShot)=>{
-        console.log(snapShot)
-    },(err)=>{
-      console.log(JSON.stringify(err));
-      setLoading(false)
-    },()=>{
-        storage.ref('audio').child(soundURI).getDownloadURL().then(firebaseUrl=>{
             
-          console.log(firebaseUrl)
-         
-           
-          if(firebaseUrl){
-            var user = firebase.auth().currentUser;
-
-            db.collection('Groupmessages').add({
-              timestamp:firebase.firestore.FieldValue.serverTimestamp(),
-              "chatroomID":id,
-              "message":"",
-              "sender":user.email, 
-              "image":'',
-              "audio":firebaseUrl,
-              "time":Date.now(),
-              new:1,
-              "status":"",
-            }).then((res)=>{
-              console.log("message sent here is ID:",res.id)
-              db.collection('messages').doc(res.id).update({
-                "status":"DELIVERED",
-                })
-              }).catch((error)=>{
-                console.log(error)
-              })
-            setLoading(false)
-            resetFields();
-          }
-        
-        })
-    })
-
-   
-  };
-
-
-
-
-            //encrypt message and send
-         const sendMessage = async (res) => {
+         const sendMessage = () => {
          var user = firebase.auth().currentUser;
           
            
@@ -359,7 +254,7 @@ const GroupMessageInput = ({id }) => {
         </View>
       )}
 
-      {soundURI && <AudioPlayer soundURI={soundURI} />}
+   
 
       <View style={styles.row}>
         <View style={styles.inputContainer}>
@@ -395,7 +290,7 @@ const GroupMessageInput = ({id }) => {
         </View>
 
         <Pressable onPress={onPress} style={styles.buttonContainer}>
-          {message || image || soundURI ? (
+          {message || image  ? (
             <Ionicons name="send" size={18} color="white" />
           ) : (
             <AntDesign name="plus" size={24} color="white" />
@@ -403,14 +298,7 @@ const GroupMessageInput = ({id }) => {
         </Pressable>
       </View>
 
-      {isEmojiPickerOpen && (
-        <EmojiSelector
-          onEmojiSelected={(emoji) =>
-            setMessage((currentMessage) => currentMessage + emoji)
-          }
-          columns={8}
-        />
-      )}
+      
       </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState, useEffect } from 'react'
-import { SafeAreaView, ScrollView, TouchableOpacity, View } from 'react-native'
+import { SafeAreaView, ScrollView, TouchableOpacity, View,TextInput,Text } from 'react-native'
 import CustomListItem from '../components/CustomListItem'
 import { auth, db } from '../services/firebase'
 import { StatusBar } from 'expo-status-bar'
@@ -12,6 +12,7 @@ const Contacts = ({ navigation }) => {
 
     const [users, setUsers] = useState([])
     const [me, setMe] = useState([])
+    const [name, setName] = useState('')
 
     const signOutUser = () => {
         auth.signOut().then(() => {
@@ -52,7 +53,19 @@ const Contacts = ({ navigation }) => {
             headerStyle: { backgroundColor: '#1e1d26', elevation: 0 },
             headerTintStyle: { color: '#fff' },
             headerTintColor: '#fff',
-            headerLeft: () => (<View />),
+            headerLeft: () => (
+                <View style={{ marginLeft: 20 }}>
+                   <TouchableOpacity activeOpacity={0.5} onPress={()=>{navigation.navigate("Home")}}>
+                        <Ionicons
+                            name='home'
+                            size={25}
+                            color='#1D51EF'
+                            style={{ marginRight: 15 }}
+                        />
+                    </TouchableOpacity>
+                    
+                </View>
+            ),
             headerRight: () => (
                 <View style={{ marginLeft: 20 }}>
                    <TouchableOpacity activeOpacity={0.5} onPress={()=>{navigation.navigate("Settings")}}>
@@ -141,10 +154,79 @@ const Contacts = ({ navigation }) => {
         })*/
     }
 
+    const getUsersAgain = ()=>{
+        //alert("get users again")
+        var user = firebase.auth().currentUser;
+        
+        if(!user){
+            alert("you are not logged in")
+            return;
+        }
+        const unsubscribe = db.collection('users').where("email", "!=", user.email).orderBy('email', 'asc').onSnapshot(snapshot => (
+            setUsers(snapshot.docs.map(doc => ({id: doc.id,data: doc.data()})))
+        ))
+
+       
+
+        db.collection("users").where("email", "==", user.email)
+        .onSnapshot((querySnapshot) => {
+           //we now have the id so we can now add the chatroom to that users object
+          const id = querySnapshot.docs.map(doc=>({ id: doc.id }))
+          if(id.length > 0){
+            setMe(id[0]?.id)
+          }
+          
+        })
+    }
+    const search = ()=>{
+        //alert("clicked")
+        if(name){
+        const filteredData = users.filter(({data}) => {
+            return Object.values(data.name).join('').toLowerCase().includes(name.toLowerCase())
+        })
+       
+        setUsers(filteredData)
+    }else{
+            getUsersAgain()
+    }
+        
+    }
+
     return (
         <SafeAreaView>
             <StatusBar style="light" />
+            <View style={{display:'flex',flexDirection:'row',backgroundColor:'#24222F'}}>
+               <TextInput
+                    placeholder="Enter Name"
+                    type="text"
+                    value={name}
+                    onChangeText={(text) => setName(text)}
+                    style={{ width: '80%',
+                    marginBottom: 10,height: 45,
+                    backgroundColor: '#1D1B25',
+                    padding: 15,
+                    color: 'grey',
+                    borderRadius: 6,
+                    borderBottomWidth: 0,
+                    marginBottom: 10,marginTop:10}}
+                    placeholderTextColor='grey'
+                />
 
+            <TouchableOpacity
+               
+                onPress={search}
+            >
+                <Ionicons
+                    name='search'
+                    size={30}
+                    color='#fff'
+                    style={{ marginLeft: 10,marginTop:14 }}
+                />
+            </TouchableOpacity>
+                
+            </View>
+            <Text style={{paddingLeft:10,paddingVertical:4,color:'white',backgroundColor:'gray'}}>Results {users.length}</Text>
+              
             <ScrollView style={styles.container}>
                 {users?.map(({ id, data }) => (
                     <Contact

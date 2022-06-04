@@ -2,14 +2,9 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator,Image } from "react-native";
 import { useWindowDimensions } from "react-native";
 import AudioPlayer from "./AudioPlayer";
-import { Ionicons } from "@expo/vector-icons";
+
 import { db } from "../services/firebase";
-import { box } from "tweetnacl";
-import {
-  decrypt,
-  getMySecretKey,
-  stringToUint8Array,
-} from "../utils/crypto";
+
 import moment from 'moment';
 import firebase from "firebase";
 
@@ -17,11 +12,11 @@ const blue = "#3777f0";
 const grey = "lightgrey";
 
 const GroupMessage = ({message,route }) => {
-  const [user, setUser] = useState();
+
   const [isMe, setIsMe] = useState(false);
   const [show, setShow] = useState(false);
   const [soundURI, setSoundURI] = useState(null);
-  const [decryptedContent, setDecryptedContent] = useState("");
+ 
  
 
   const { width } = useWindowDimensions();
@@ -37,7 +32,7 @@ const GroupMessage = ({message,route }) => {
   }
   //console.log("is me",isMe)
 
-  useEffect(()=>{
+  /*useEffect(()=>{
     let mounted = true
     if (mounted) {
     var user = firebase.auth().currentUser;
@@ -54,7 +49,7 @@ const GroupMessage = ({message,route }) => {
           mounted = false
           console.log("component unmounted")
       }
-  },[message,route])
+  },[message,route])*/
 
   
 
@@ -90,42 +85,37 @@ const GroupMessage = ({message,route }) => {
           
         </View>
       ):(<></>)}
-      {message.audio ? (<><AudioPlayer soundURI={message?.audio} /></>):(<></>)}
-       {
-         show?
-         (<>
-         {!!message.message && (
-        <Text style={{ color: isMe ? "black" : "white",marginRight:'auto' }}>
-          {message.message}
-        </Text>
-      )}
-         </>):
-         (<>
-         {!!message.message && (
+       
            
         <Text style={{ color: isMe ? "black" : "white" ,marginRight:'auto'}}>
           {
-            isMe?(<View style={{display:'flex'}}>
-                 <Text style={{color:'gray'}}>{message.sender}</Text> 
-            <Text style={{color:'black'}}>{message.message}</Text> 
-        <Text style={{fontSize:12,color:'gray',fontWeight:'400'}}>{moment(new Date(message?.timestamp?.seconds*1000)).format('LT')}</Text>
-
-      
-        </View>):
-            (<View style={{display:'flex'}}>
-                <Text style={{color:'#f5f5f5'}}>{message.sender}</Text> 
-                <Text style={{color:'white'}}>{message.message}</Text> 
-            <Text style={{fontSize:12,color:'#f5f5f5',fontWeight:'400'}}>{moment(new Date(message?.timestamp?.seconds*1000)).format('LT')}</Text>
-    
-          
-            </View>)
+            isMe?
+            (
+            <View style={{display:'flex'}}>
+                 <Text style={{color:'gray'}}>{message?.sender}</Text> 
+                <Text style={{color:'black'}}>{message?.message}</Text> 
+                {
+                  message?.timestamp?(<>
+                   <Text style={{fontSize:12,color:'gray',fontWeight:'400'}}>{moment(new Date(message?.timestamp?.seconds*1000)).format('LT')}</Text>
+                  </>):(<></>)
+                }
+                </View>
+            ):
+            (
+            <View style={{display:'flex'}}>
+                <Text style={{color:'#f5f5f5'}}>{message?.sender}</Text> 
+                <Text style={{color:'white'}}>{message?.message}</Text> 
+                {
+                  message?.timestamp?(<>
+                  <Text style={{fontSize:12,color:'#f5f5f5',fontWeight:'400'}}>{moment(new Date(message?.timestamp?.seconds*1000)).format('LT')}</Text>
+              </>):(<></>)
+                }
+                </View>
+             )
           }
         
         </Text>
-      )
-      }
-         </>)
-       }
+    
 
           
     </View>

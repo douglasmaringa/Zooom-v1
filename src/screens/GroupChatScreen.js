@@ -13,7 +13,7 @@ import { Header } from '@react-navigation/stack';
 
 const GroupChatScreen = ({ navigation, route }) => {
 
-    console.log(route?.params)
+    //console.log(route?.params)
 
     const [input, setInput] = useState('')
     const [messages, setMessages] = useState([])
@@ -52,7 +52,7 @@ const GroupChatScreen = ({ navigation, route }) => {
         })
     }, [navigation, messages])
 
-    const sendMessage = () => {
+    /*const sendMessage = () => {
         Keyboard.dismiss()
 
         db.collection('chats').doc(route?.params?.id).collection('messages').add({
@@ -64,7 +64,7 @@ const GroupChatScreen = ({ navigation, route }) => {
         })
 
         setInput('')
-    }
+    }*/
 
 /*
     useEffect(() => {

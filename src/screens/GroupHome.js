@@ -7,17 +7,13 @@ import { Ionicons } from '@expo/vector-icons'
 import { styles } from '../styles/HomeScreenStyles'
 import firebase from 'firebase'
 
-const GroupScreen = ({ navigation,route }) => {
+const GroupScreen = ({ navigation}) => {
 
-    console.log(route.params)
+    //console.log(route.params)
 
     const [chats, setChats] = useState([])
 
-    const signOutUser = () => {
-        auth.signOut().then(() => {
-            navigation.replace('Login')
-        })
-    }
+   
 
     useEffect(() => {
         var user = firebase.auth().currentUser;
