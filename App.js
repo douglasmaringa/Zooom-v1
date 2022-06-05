@@ -19,6 +19,7 @@ import ProfileSettings from './src/screens/ProfileSettings';
 import PrivacySettings from './src/screens/PrivacySettings';
 import PaymentSettings from './src/screens/PaymentSettings';
 import { usePreventScreenCapture } from 'expo-screen-capture';
+import PaymentSuccess from './src/screens/PaymentSuccess';
 
 LogBox.ignoreAllLogs()
 
@@ -165,6 +166,16 @@ export default function App() {
 <Stack.Screen
           name="PaymentSettings"
           component={PaymentSettings}
+          options={{
+            headerStyle: {
+              backgroundColor: '#1e1d26',
+              elevation: 0
+            }
+          }}
+        />
+        <Stack.Screen
+          name="PaymentSuccess"
+          component={PaymentSuccess}
           options={{
             headerStyle: {
               backgroundColor: '#1e1d26',
