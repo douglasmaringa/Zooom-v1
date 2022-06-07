@@ -20,11 +20,12 @@ import PrivacySettings from './src/screens/PrivacySettings';
 import PaymentSettings from './src/screens/PaymentSettings';
 import { usePreventScreenCapture } from 'expo-screen-capture';
 import PaymentSuccess from './src/screens/PaymentSuccess';
+import Splash from './src/screens/Splash';
 
 LogBox.ignoreAllLogs()
 
 export default function App() {
-  usePreventScreenCapture();
+ // usePreventScreenCapture();
   const Stack = createStackNavigator()
 
   const globalScreenOptions = {
@@ -37,6 +38,12 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={globalScreenOptions}>
+      <Stack.Screen
+          name="Splash"
+          component={Splash}
+          options={{ headerShown: false }}
+        />
+
         <Stack.Screen
           name="Login"
           component={LoginScreen}

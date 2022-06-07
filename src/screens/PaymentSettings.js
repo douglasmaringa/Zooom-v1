@@ -81,7 +81,7 @@ const PaymentSettings = ({navigation}) => {
      
     </View>
     <View style={{paddingBottom:20,borderBottomColor:'black',borderBottomWidth:0.5}}>
-   <Text style={{color:'black',marginTop:10,fontWeight:'700',textAlign:'center'}}>Free Trial 3 months left</Text>
+   <Text style={{color:'black',marginTop:10,fontWeight:'700',textAlign:'center'}}>Free Trial 6 months left</Text>
 
     </View>
 <Card navigation={navigation}/>
